@@ -1,5 +1,9 @@
+import sys
 from typing import Dict, List
 import os
+
+
+
 
 def get_from_user():
         massage = input("Enter a message: ")
@@ -12,50 +16,58 @@ def get_from_user():
             "window_size" : window_size,
             "timeout" : timeout
         }
-        validate_input(params)
-        return params
+        try:
+            validate_input(params)
+            return params
+        except Exception as e:
+            print(f"Unvalied parameters from user: {e}")
+            sys.exit(1)
+
+
 
 
 def get_from_file(file_path : str):
-        with open(file_path, 'r') as file:
-            data = file.readlines()
-            params = {}
-            for line in data:
-                params[line.split(":")[0].strip("\n")] = line.split(":")[1].strip("\n")
-        return params
+        try:
+            with open(file_path, 'r') as file:
+                data = file.readlines()
+                params = {}
+                for line in data:
+                    params[line.split(":")[0].strip("\n")] = line.split(":")[1].strip("\n")
+            return params
+        except Exception as e:
+            print(f"Unvalid parameters from file: {e}")
 
 
 
 def validate_input(params : Dict[str, str]) -> None:
-    for key in params:
-        if key == "massage":
-            pass
-        elif not params[key].isnumeric():
-            raise ValueError("all values must be numeric")
-        elif int(params[key]) <= 0:
-            raise ValueError("all values must be positive")
-
+    try:
+        for key in params:
+            if key == "massage":
+                pass
+            elif not params[key].isnumeric():
+                raise ValueError("all values must be numeric")
+            elif int(params[key]) <= 0:
+                raise ValueError("all values must be positive")
+    except Exception as e:
+        print(f"Error while validating parameters: {e}")
 
 
 def find_all_text_files() -> list[str]:
-    """
-    Find all text files in the current project directory.
+    try:
+        current_directory = os.getcwd()
+        text_files = []
 
-    Returns:
-        list[str]: A list of absolute paths to all `.txt` files in the current directory.
-    """
-    current_directory = os.getcwd()
-    text_files = []
+        # Iterate over all files in the current directory
+        for file_name in os.listdir(current_directory):
+            file_path = os.path.join(current_directory, file_name)
 
-    # Iterate over all files in the current directory
-    for file_name in os.listdir(current_directory):
-        file_path = os.path.join(current_directory, file_name)
+            # Check if it's a .txt file
+            if os.path.isfile(file_path) and file_name.endswith('.txt'):
+                text_files.append(file_path)
 
-        # Check if it's a .txt file
-        if os.path.isfile(file_path) and file_name.endswith('.txt'):
-            text_files.append(file_path)
-
-    return text_files
+        return text_files
+    except Exception as e:
+        print(f"Error while searching for text files: {e}")
 
 def choose_text_file(text_files : list[str]) -> str:
     print(f"found more that one text file: {text_files}")
@@ -82,7 +94,9 @@ def get_params() -> Dict[str, str]:
         print(error)
 
 def write_dict_to_file(params: dict, filename: str) -> None:
-    with open(filename, "w") as file:
-        for key, value in params.items():
-            file.write(f"{key}:{value}\n")
-
+    try:
+        with open(filename, "w") as file:
+            for key, value in params.items():
+                file.write(f"{key}:{value}\n")
+    except Exception as e:
+        print(f"Error while writing to file: {e}")
