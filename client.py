@@ -126,12 +126,14 @@ def handle_lost_packages(client_socket, resend):
 
     print(f"handling lost package: ")
     if LAST_ACK_SEQ +1 in CURRENT_PACKAGES:
-        to_send = CURRENT_PACKAGES.get(LAST_ACK_SEQ +1)
+        lost_pack = CURRENT_PACKAGES.get(LAST_ACK_SEQ +1)
+        to_send = lost_pack.get_package_for_resend(PACKAGE_COUNT, lost_pack.getSeq())
         print(f"found lost pack: to send")
         CURRENT_PACKAGES.update({int(to_send.getSeq()): to_send})
         NO_ACKS.pop(to_send.get_prev_seq())
         NO_ACKS.update({int(to_send.getSeq()): to_send})
-        to_send.update_for_resend(PACKAGE_COUNT + 1, to_send.getSeq())
+        PACKAGE_COUNT +=1
+
         if LAST_ACK_SEQ + 2 in CURRENT_PACKAGES:
             next_threshold = CURRENT_PACKAGES.get(LAST_ACK_SEQ+2)
             print(f"updating window size by next no ack: {SEQ_WINDOW}")
@@ -227,8 +229,6 @@ def ACK_Header(ack_package : Package):
             TIME_WINDOW = float(PARAMS["timeout"]) + next_timer
         if int(ack_package.payload) in NO_ACKS:
             NO_ACKS.pop(int(ack_package.payload))
-
-
 
         else:
             print(f"Warning: No package found for key '{ack_package.payload}'.")

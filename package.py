@@ -63,11 +63,17 @@ class Package:
 ######################
 #   resend updates   #
 ######################
-
     def update_for_resend(self, new_seq , prev_seq):
         self.sent_time = time.time()
         self.prev_seq = prev_seq
         self.seq = new_seq
+
+    def get_package_for_resend(self, new_seq : int, prev_seq : int):
+        new_pack = Package(self.header, self.payload, self.seq)
+        new_pack.update_for_resend(new_seq, prev_seq)
+        return new_pack
+
+
 
 
     ######################
