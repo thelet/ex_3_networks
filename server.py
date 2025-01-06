@@ -132,8 +132,35 @@ def GET_MAX_Header(client_socket : socket.socket):
 
 
 def MSG_Header(client_socket : socket.socket, msg_package : Package, lose_those_package : List[int] = None, client_address = None):
-    last_seq = 0
+    last_seq = int(msg_package.get_pos()) -1
     msg_list = []
+    full_msg = []
+    while msg_package.get_header() == "MSG":
+        data = client_socket.recv(BUFSIZ)
+        msg_package = Package("TEMP", " ")
+        msg_package.decode_package(data, PARAMS["maximum_msg_size"])
+        msg_list.append(msg_package)
+        msg_list.sort(key=lambda package: package.get_pos())
+
+        for pack in msg_list:
+            if int(pack.get_pos()) == last_seq +1:
+                print(f"sending ack for pack: {pack}")
+                pack.send_ack(client_socket, PARAMS["maximum_msg_size"])
+                last_seq = pack.get_pos()
+                full_msg.append(pack)
+        for pack in full_msg:
+            if pack.get_pos() in msg_list:
+                msg_list.remove(pack)
+
+
+
+
+    if msg_package.get_header() == "DONE":
+        print(f"done sending file")
+        if msg_list or len(msg_list) > 0:
+            print(f"warning! lost data: {[pack.get_payload() for pack in msg_list]}")
+        MSG_DONE_Header(msg_list, client_socket, msg_package)
+    """
     missing_pack : int
     msg_on_hold =[]
     while msg_package.get_header() == "MSG":
@@ -170,7 +197,7 @@ def MSG_Header(client_socket : socket.socket, msg_package : Package, lose_those_
         if msg_on_hold or len(msg_on_hold) >0:
             print(f"warning! lost data: {msg_on_hold}")
         MSG_DONE_Header(msg_list, client_socket, msg_package)
-
+    """
 
 
 def CLOSE_Header(client_socket : socket.socket, client_address):

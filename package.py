@@ -38,8 +38,8 @@ class Package:
     # function to print the packet with its variables
     def __str__(self):
         return (
-            f"\nsequence:  {self.seq} \ndata: {self.payload} \nsent time: {self.sent_time} \nACK: {self.ackrecv}\n"
-            f" prev seq: {self.prev_seq} \n pos: {self.pos} \n")
+            f"\n| sequence:  {self.seq} | data: {self.payload} | sent time: {self.sent_time} |ACK: {self.ackrecv} |"
+            f" prev seq: {self.prev_seq} | pos: {self.pos} | header: {self.header} |\n")
 
 ######################
 #   ACKs   #
