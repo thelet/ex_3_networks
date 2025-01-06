@@ -8,6 +8,7 @@ from time import sleep, time
 from typing import List, Dict
 
 import functions
+import package
 
 from functions import get_from_file, get_from_user, get_params
 import threading
@@ -28,7 +29,7 @@ print(PARAMS)
 MAX_MSG_SIZE = 4
 LOSE_THOSE_PACKAGE = [3,9,14]
 LAST_SEQ=0
-HEADER_SIZE = 40
+HEADER_SIZE = package.HEADER_SIZE
 BUFSIZ = HEADER_SIZE + MAX_MSG_SIZE
 
 

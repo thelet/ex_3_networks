@@ -98,10 +98,6 @@ def receive(client_socket):
             CLOSE_Header(client_socket=client_socket)
             break
 
-
-def check_treshhold(package_seq):
-    return  check_time_threshold() and check_seq_threshold(package_seq)
-
 def check_time_threshold():
     if package is not None:
         if TIME_WINDOW and TIME_WINDOW <= time.time():
@@ -314,6 +310,9 @@ def update_time_window():
         print(f'Updating TIME window by package {last_no_ack.get_pos()} :\n'
               f'New time window {float(last_no_ack.get_time()) + float(PARAMS["timeout"])}, Prev time window: {TIME_WINDOW}')
         TIME_WINDOW = float(last_no_ack.get_time()) + float(PARAMS["timeout"])
+    else:
+        print("starting time window based on current time ")
+        TIME_WINDOW = float(time.time()) + float(PARAMS["timeout"])
 
 
 def update_seq_window():
