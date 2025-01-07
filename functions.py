@@ -150,11 +150,9 @@ def get_params() -> Dict[str, str]:
         if len(paths) == 0:
             print("No text files found")
             params = get_from_user()
-            tofile = int(input("enter '1' to save params to file: "))
-            if tofile == 1:
-                write_dict_to_file(params, "params.txt")
-                print("params saved to params.txt")
-            return params
+            write_dict_to_file(params, "params.txt")
+            print("params saved to params.txt")
+            return file_to_json("params.txt")
     except Exception as error:
         print(error)
 
@@ -170,7 +168,10 @@ def get_client_params():
 
 def get_server_params():
     server_keys = ["maximum_msg_size"]
-    return slice_json(server_keys)
+    params = slice_json(server_keys)
+    params["maximum_msg_size"] = int(params.get("maximum_msg_size", 0))
+    return params
+
 
 def write_dict_to_file(params: dict, filename: str) -> None:
     try:

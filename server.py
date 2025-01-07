@@ -1,5 +1,6 @@
 
 import socket
+import threading
 
 from socket import AF_INET, SOCK_STREAM
 from threading import Thread
@@ -143,8 +144,6 @@ def MSG_Header(client_socket : socket.socket, msg_package : Package, client_addr
     full_msg = []
     while msg_package.get_header() == "MSG":
         try:
-
-
             print(f"received package: {msg_package} last_seq = {last_seq}")
             msg_list.append(msg_package)
             msg_list.sort(key=lambda package: package.get_pos())
@@ -155,9 +154,11 @@ def MSG_Header(client_socket : socket.socket, msg_package : Package, client_addr
                     pack.send_ack(client_socket, PARAMS["maximum_msg_size"])
                     last_seq = pack.get_pos()
                     full_msg.append(pack)
+
             for pack in full_msg:
                 if pack in msg_list:
                     msg_list.remove(pack)
+
             data = client_socket.recv(BUFSIZ)
             msg_package = Package("TEMP", " ")
             msg_package.decode_package(data, PARAMS["maximum_msg_size"])
@@ -194,7 +195,7 @@ def MSG_DONE_Header(client_socket : socket.socket, msg_package : Package, msg : 
     str_msg = ""
     if msg:
         msg.sort(key=lambda package: package.get_pos())
-        print(f"{pack.get_payload()} , " for pack in msg)
+        print(f"msg packages: {[pack.get_payload() for pack in msg]}")
         for pack in msg:
             str_msg += pack.get_payload()
         print("\n full message received: ")
