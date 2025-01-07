@@ -1,17 +1,15 @@
-import sys
+
 import socket
-from ctypes.wintypes import HANDLE
-from pickle import GLOBAL
+
 from socket import AF_INET, SOCK_STREAM
 from threading import Thread
-from time import sleep, time
-from typing import List, Dict
+
+from typing import List
 
 import functions
 import package
 
-from functions import get_from_file, get_from_user, get_params
-import threading
+
 
 from package import Package
 
@@ -20,14 +18,13 @@ from package import Package
 HOST = '127.0.0.1'
 PORT = 55558
 
-HANDLED_GET = False
+
 MAX_CLIENTS = 1
 ADDR = (HOST, PORT)
 CLIENTS = []
 PARAMS = functions.get_server_params()
 print(PARAMS)
 MAX_MSG_SIZE = 4
-LOSE_THOSE_PACKAGE = [3,9,14]
 LAST_SEQ=0
 HEADER_SIZE = package.HEADER_SIZE
 BUFSIZ = HEADER_SIZE + MAX_MSG_SIZE
@@ -87,9 +84,7 @@ def handle_client(CLIENT_SOCKET, client_address):
     try:
         while True:
             try:
-
                 data = CLIENT_SOCKET.recv(BUFSIZ)
-
                 if not data:
                     print(f"Client {client_address} forcibly closed the connection", flush=True)
                     CLOSE_Header(client_socket= CLIENT_SOCKET, client_address=client_address)
@@ -98,7 +93,6 @@ def handle_client(CLIENT_SOCKET, client_address):
                 new_package = Package("TEMP", " ")
                 print(f"current max size: {MAX_MSG_SIZE}")
                 new_package.decode_package(data, MAX_MSG_SIZE)
-
                 header = new_package.get_header()
 
                 if header == "GET_MAX":
@@ -107,7 +101,7 @@ def handle_client(CLIENT_SOCKET, client_address):
 
                 elif header == "MSG" or header == "DONE":
                     print(f"MSG from {client_address}, starting to receive:")
-                    MSG_Header(client_socket= CLIENT_SOCKET,msg_package= new_package, lose_those_package=LOSE_THOSE_PACKAGE, client_address= client_address)
+                    MSG_Header(client_socket= CLIENT_SOCKET,msg_package= new_package, client_address= client_address)
 
                 elif header == "CLOSE":
                     print(f"CLOSE request from {client_address}")
@@ -143,16 +137,14 @@ def GET_MAX_Header(client_socket : socket.socket):
 
 
 
-def MSG_Header(client_socket : socket.socket, msg_package : Package, lose_those_package : List[int] = None, client_address = None):
+def MSG_Header(client_socket : socket.socket, msg_package : Package, client_address = None):
     last_seq = int(msg_package.get_pos()) -1
     msg_list = []
     full_msg = []
     while msg_package.get_header() == "MSG":
         try:
 
-            data = client_socket.recv(BUFSIZ)
-            msg_package = Package("TEMP", " ")
-            msg_package.decode_package(data, PARAMS["maximum_msg_size"])
+
             print(f"received package: {msg_package} last_seq = {last_seq}")
             msg_list.append(msg_package)
             msg_list.sort(key=lambda package: package.get_pos())
@@ -166,7 +158,9 @@ def MSG_Header(client_socket : socket.socket, msg_package : Package, lose_those_
             for pack in full_msg:
                 if pack in msg_list:
                     msg_list.remove(pack)
-
+            data = client_socket.recv(BUFSIZ)
+            msg_package = Package("TEMP", " ")
+            msg_package.decode_package(data, PARAMS["maximum_msg_size"])
         except Exception as e:
             print(f"Error while receiving MSG data: {e}", flush=True)
             break

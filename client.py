@@ -322,6 +322,9 @@ def update_seq_window():
         print(f'Updating SEQ window size by last acked pack: {last_ack}\n'
               f'New seq window: {int(PARAMS["window_size"]) + int(last_ack)} Prev seq window : {SEQ_WINDOW}\n')
         SEQ_WINDOW = int(PARAMS["window_size"]) + int(last_ack)
+    else:
+        print("starting seq window based on params ")
+        SEQ_WINDOW = int(PARAMS["window_size"])
 
 
 def get_last_ack_seq():
