@@ -81,7 +81,7 @@ def handle_client(CLIENT_SOCKET, client_address):
     print(f"Handling client {client_address}", flush=True)
     done= initial_connection(CLIENT_SOCKET, client_address)
     if done:
-        update_buffer_andmax_size(PARAMS["maximum_msg_size"])
+        update_buffer_andmax_size(int(PARAMS["maximum_msg_size"]))
     try:
         while True:
             try:

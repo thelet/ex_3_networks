@@ -62,6 +62,7 @@ class Package:
 
     def encode_package(self, max_payload) -> bytes:
         global max_header_size
+        max_payload = int(max_payload)
         """
         Format:
         - header: 10 bytes (string, padded with \x00)
@@ -95,6 +96,7 @@ class Package:
         """
         Deserialize from the fixed-size byte structure back into the Package fields.
         """
+        max_payload = int(max_payload)
         global max_header_size
         # Must match the same format used in encode_package
         format_str = f"{max_header_size}s{max_payload}s i d ? i i"

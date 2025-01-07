@@ -1,33 +1,27 @@
 import sys
-from typing import Dict, List
+from typing import Dict, List, Any
 import os
 
-import subprocess
 
 
-def run_script_in_new_terminal(script_path):
-    """
-    Runs a Python script in a new terminal window.
 
-    Args:
-        script_path (str): The path to the Python script to run.
-    """
+def get_params() -> Dict[str, Any]:
     try:
-        # Adjust command based on your OS
-        command = [
-            "python",  # Use 'python3' if needed
-            script_path,
-        ]
+        paths = find_all_text_files()
+        if len(paths) == 1:
+            return file_to_json(paths[0])
+        if len(paths) >1:
+            path = choose_text_file(paths)
+            return file_to_json(path)
+        if len(paths) == 0:
+            print("No text files found")
+            params = get_from_user()
+            write_dict_to_file(params, "params.txt")
+            print("params saved to params.txt")
+            return file_to_json("params.txt")
+    except Exception as error:
+        print(error)
 
-        # On Windows: Use `start` to open in a new terminal
-        subprocess.Popen(["start", "cmd", "/k"] + command, shell=True)
-
-        # On macOS/Linux: Use `gnome-terminal`, `xterm`, or equivalent
-        # subprocess.Popen(["gnome-terminal", "--"] + command)
-
-        print(f"Running {script_path} in a new terminal window.")
-    except Exception as e:
-        print(f"Error running script {script_path}: {e}")
 
 
 def get_from_user():
@@ -49,23 +43,7 @@ def get_from_user():
             sys.exit(1)
 
 
-import json
-
-
 def file_to_json(file_path: str) -> dict:
-    """
-    Reads a text file and converts its key-value pairs into a JSON-like dictionary.
-
-    Args:
-        file_path (str): Path to the text file.
-
-    Returns:
-        dict: A dictionary representing the JSON object.
-
-    Raises:
-        ValueError: If the file contains invalid formatting.
-        IOError: If the file cannot be read.
-    """
     try:
         json_data = {}
 
@@ -80,7 +58,7 @@ def file_to_json(file_path: str) -> dict:
                 key = key.strip()
                 value = value.strip()
 
-                # Convert numeric values to integers if possible
+                # Convert numeric values to integers
                 if value.isdigit():
                     value = int(value)
 
@@ -91,20 +69,7 @@ def file_to_json(file_path: str) -> dict:
         raise ValueError(f"Error processing file: {e}")
 
 
-def get_from_file(file_path : str):
-        try:
-            with open(file_path, 'r') as file:
-                data = file.readlines()
-                params = {}
-                for line in data:
-                    params[line.split(":")[0].strip("\n")] = line.split(":")[1].strip("\n")
-            return params
-        except Exception as e:
-            print(f"Unvalid parameters from file: {e}")
-
-
-
-def validate_input(params : Dict[str, str]) -> None:
+def validate_input(params : Dict[str, Any]) -> None:
     try:
         for key in params:
             if key == "massage":
@@ -115,6 +80,13 @@ def validate_input(params : Dict[str, str]) -> None:
                 raise ValueError("all values must be positive")
     except Exception as e:
         print(f"Error while validating parameters: {e}")
+
+
+
+
+
+
+
 
 
 def find_all_text_files() -> list[str]:
@@ -134,27 +106,13 @@ def find_all_text_files() -> list[str]:
     except Exception as e:
         print(f"Error while searching for text files: {e}")
 
+
 def choose_text_file(text_files : list[str]) -> str:
     print(f"found more that one text file: {text_files}")
     path_to_params = int(input("Choose a text file: "))
     return text_files[path_to_params]
 
-def get_params() -> Dict[str, str]:
-    try:
-        paths = find_all_text_files()
-        if len(paths) == 1:
-            return file_to_json(paths[0])
-        if len(paths) >1:
-            path = choose_text_file(paths)
-            return file_to_json(path)
-        if len(paths) == 0:
-            print("No text files found")
-            params = get_from_user()
-            write_dict_to_file(params, "params.txt")
-            print("params saved to params.txt")
-            return file_to_json("params.txt")
-    except Exception as error:
-        print(error)
+
 
 def slice_json(keys_to_extract):
     json_data = get_params()
